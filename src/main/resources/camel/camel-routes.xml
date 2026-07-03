@@ -34,7 +34,6 @@
             <!-- file processing -->
             <otherwise>
                 <choice>
-                    <!-- Pokud uživatel zadal parametr 'fileName' -->
                     <when>
                         <simple>${header.fileName} != null</simple>
                         <log message="The recognized filename is: ${header.fileName}"/>
@@ -42,9 +41,8 @@
                             <simple>${header.fileName}</simple>
                         </setHeader>
                     </when>
-                    <!-- Pokud parametr 'fileName' chybi, pouzije se datum a cas -->
                     <otherwise>
-                        <log message="Parametr 'fileName' nebyl zadan, generuji nazev podle data a casu."/>
+                        <log message="Generating the file name based on date and time"/>
                         <setHeader name="CamelOverruleFileName">
                             <simple>${date:now:yyyyMMdd-HHmmss}.txt</simple>
                         </setHeader>
