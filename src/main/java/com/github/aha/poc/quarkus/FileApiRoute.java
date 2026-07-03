@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FileApiRoute extends RouteBuilder {
 
+	public final static String HEADER_CONTENT = "content";
+
     @ConfigProperty(name = "app.output.dir")
     String outputDir;
 
@@ -20,18 +22,23 @@ public class FileApiRoute extends RouteBuilder {
 
         rest("/java")
             .post("/files")
-                .to("direct:saveToFile");
+            	.routeId("saveJavaToFileRoute")
+                .to("direct:saveToFileViaJava");
 
-        from("direct:saveToFile")
-			.log("Received a request to save tontent to file. Checking query param 'content'")
-	        .setBody(header("content"))
+        from("direct:saveToFileViaJava")
+		    .log("Received a request to save tontent to file. Checking query param '%s'".formatted(HEADER_CONTENT))
+		    .setBody(header(HEADER_CONTENT))
             .choice()
                 .when(body().isNull())
-                    .setBody(constant("'content' query parameter is missing"))
+                	.setBody(constant("'%s' query parameter is missing".formatted(HEADER_CONTENT)))
                     .setHeader("CamelHttpResponseCode", constant(400))
                 .otherwise()
-		        	.setProperty("generatedFileName", simple("${date:now:yyyyMMdd-HHmmss}.txt"))
-		        	.setHeader("CamelOverruleFileName", exchangeProperty("generatedFileName"))
+                	.choice()
+                		.when(header("fileName").isNull())
+                			.setProperty("generatedFileName", simple("${date:now:yyyyMMdd-HHmmss}.txt"))
+                		.otherwise()
+				        	.setProperty("generatedFileName", header("fileName"))
+			        .end()
                     .toD("file:" + outputDir + "?fileName=${exchangeProperty.generatedFileName}&fileExist=Override")
                     .setBody(simple("A new file was stored as ${exchangeProperty.generatedFileName}"))
                     .setHeader("CamelHttpResponseCode", constant(200))

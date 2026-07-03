@@ -1,5 +1,6 @@
 package com.github.aha.poc.quarkus;
 
+import static com.github.aha.poc.quarkus.FileApiRoute.HEADER_CONTENT;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
@@ -25,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class XmlConfigRouteTest {
 
-	final static String HEADER_CONTENT = "content";
 	final static String ROOT_PATH = "/xml/files";
 	final static String TEST_CONTENT = "HelloCamelQuarkusIntegrationTest";
 
