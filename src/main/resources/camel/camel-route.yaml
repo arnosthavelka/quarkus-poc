@@ -2,12 +2,12 @@
     path: "/yaml"
     post:
       - path: "/files"
-        to: "direct:saveXmlToFile"
+        to: "direct:saveYamlToFile"
 
 - route:
     id: "saveYamlToFileRoute"
     from:
-      uri: "direct:saveXmlToFile"
+      uri: "direct:saveYamlToFile"
       steps:
         - log:
             message: "Received a request to save tontent to file. Checking query param 'content'"

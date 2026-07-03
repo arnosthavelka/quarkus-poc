@@ -37,6 +37,8 @@ curl -X POST "http://localhost:8080/java/files?content=HelloMyFriend"
 
 curl -X POST "http://localhost:8080/xml/files?content=ObsahSouboruVxml"
 curl -X POST "http://localhost:8080/xml/files?content=ObsahSouboruVxml&fileName=muj_specialni_soubor.txt"
+
+curl -X POST "http://localhost:8080/yaml/files?content=ObsahSouboruVxml"
 ```
 
 ## Project creation
