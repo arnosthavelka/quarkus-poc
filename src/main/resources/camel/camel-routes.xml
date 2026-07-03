@@ -37,22 +37,22 @@
                     <when>
                         <simple>${header.fileName} != null</simple>
                         <log message="The recognized filename is: ${header.fileName}"/>
-                        <setHeader name="CamelOverruleFileName">
+                        <setProperty name="generatedFileName">
                             <simple>${header.fileName}</simple>
-                        </setHeader>
+                        </setProperty>
                     </when>
                     <otherwise>
                         <log message="Generating the file name based on date and time"/>
-                        <setHeader name="CamelOverruleFileName">
+                        <setProperty name="generatedFileName">
                             <simple>${date:now:yyyyMMdd-HHmmss}.txt</simple>
-                        </setHeader>
+                        </setProperty>
                     </otherwise>
                 </choice>
 
 				<!-- file storing -->
-                <toD uri="file:{{app.output.dir}}?fileExist=Override"/>
+                <toD uri="file:{{app.output.dir}}?fileName=${exchangeProperty.generatedFileName}&amp;fileExist=Override"/>
                 <setBody>
-                    <simple>A new file was stored as ${header.CamelOverruleFileName}</simple>
+                    <simple>A new file was stored as ${exchangeProperty.generatedFileName}</simple>
                 </setBody>
                 <setHeader name="CamelHttpResponseCode">
                     <constant>200</constant>

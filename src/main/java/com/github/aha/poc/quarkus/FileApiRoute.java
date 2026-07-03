@@ -30,9 +30,10 @@ public class FileApiRoute extends RouteBuilder {
                     .setBody(constant("'content' query parameter is missing"))
                     .setHeader("CamelHttpResponseCode", constant(400))
                 .otherwise()
-                    .setHeader("CamelOverruleFileName", simple("${date:now:yyyyMMdd-HHmmss}.txt"))
-                    .toD("file:" + outputDir + "?fileExist=Override")
-                    .setBody(simple("A new file was stored as ${header.CamelOverruleFileName}"))
+		        	.setProperty("generatedFileName", simple("${date:now:yyyyMMdd-HHmmss}.txt"))
+		        	.setHeader("CamelOverruleFileName", exchangeProperty("generatedFileName"))
+                    .toD("file:" + outputDir + "?fileName=${exchangeProperty.generatedFileName}&fileExist=Override")
+                    .setBody(simple("A new file was stored as ${exchangeProperty.generatedFileName}"))
                     .setHeader("CamelHttpResponseCode", constant(200))
             .end();
     }

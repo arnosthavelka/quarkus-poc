@@ -1,0 +1,66 @@
+- rest:
+    path: "/yaml"
+    post:
+      - path: "/files"
+        to: "direct:saveXmlToFile"
+
+- route:
+    id: "saveYamlToFileRoute"
+    from:
+      uri: "direct:saveXmlToFile"
+      steps:
+        - log:
+            message: "Received a request to save tontent to file. Checking query param 'content'"
+        
+        - setBody:
+            expression:
+              header: "content"
+        
+        - choice:
+            when:
+              - simple: "${body} == null"
+                steps:
+                  - log:
+                      loggingLevel: "WARN"
+                      message: "Validation failed: 'content' query parameter is missing"
+                  - setBody:
+                      expression:
+                        constant: "'content' query parameter is missing"
+                  - setHeader:
+                      name: "CamelHttpResponseCode"
+                      expression:
+                        constant: 400
+            
+            otherwise:
+              steps:
+                - choice:
+                    when:
+                      - simple: "${header.fileName} != null"
+                        steps:
+                          - log:
+                              message: "The recognized filename is: ${header.fileName}"
+                          - setProperty:
+                              name: "generatedFileName"
+                              expression:
+                                simple: "${header.fileName}"
+                    otherwise:
+                      steps:
+                        - log:
+                            message: "Generating the file name based on date and time"
+                        - setProperty:
+                            name: "generatedFileName"
+                            expression:
+                              simple: "${date:now:yyyyMMdd-HHmmss}.txt"
+                
+                # file storing
+                - toD:
+                    uri: "file:{{app.output.dir}}?fileName=${exchangeProperty.generatedFileName}&fileExist=Override"
+                
+                - setBody:
+                    expression:
+                      simple: "A new file was stored as ${exchangeProperty.generatedFileName}"
+                
+                - setHeader:
+                    name: "CamelHttpResponseCode"
+                    expression:
+                      constant: 200
