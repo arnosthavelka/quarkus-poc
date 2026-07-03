@@ -23,10 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @QuarkusTest
 @Slf4j
-public class XmlConfigRouteTest {
+public class YamlConfigRouteTest {
 
 	final static String HEADER_CONTENT = "content";
-	final static String ROOT_PATH = "/xml/files";
+	final static String ROOT_PATH = "/yaml/files";
 	final static String TEST_CONTENT = "HelloCamelQuarkusIntegrationTest";
 
     @ConfigProperty(name = "app.output.dir")
@@ -102,14 +102,14 @@ public class XmlConfigRouteTest {
 		}
 
     }
-
+    
     @Test
 	public void failOnMissingParam() {
-		given()
+        given()
         .when()
 		    .post(ROOT_PATH)
         .then()
-        	.statusCode(400)
-        	.body(containsString("'content' query parameter is missing"));
+             .statusCode(400)
+		    .body(containsString("'" + HEADER_CONTENT + "' query parameter is missing"));
     }
 }

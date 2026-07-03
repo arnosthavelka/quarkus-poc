@@ -1,5 +1,6 @@
 package com.github.aha.poc.quarkus;
 
+import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -17,12 +18,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.RestAssured;
 import lombok.extern.slf4j.Slf4j;
 
 @QuarkusTest
 @Slf4j
 public class JavaConfigRouteTest {
+
+	final static String HEADER_CONTENT = "content";
+	final static String ROOT_PATH = "/java/files";
+	final static String TEST_CONTENT = "HelloCamelQuarkusIntegrationTest";
 
     @ConfigProperty(name = "app.output.dir")
     String outputDir;
@@ -52,33 +56,32 @@ public class JavaConfigRouteTest {
 
     @Test
 	public void saveFileSuccesslly() throws IOException {
-        String testContent = "HelloCamelQuarkusIntegrationTest";
 		assumeThat(Files.exists(outputPath)).isFalse();
 
-        RestAssured.given()
-				.queryParam("content", testContent)
-                .when()
-				.post("/java/files")
-                .then()
-                .statusCode(200)
-				.body(containsString("A new file was stored as"));
+		given()
+		    .queryParam(HEADER_CONTENT, TEST_CONTENT)
+	    .when()
+		    .post(ROOT_PATH)
+	    .then()
+	        .statusCode(200)
+			.body(containsString("A new file was stored as"));
 
 
         try (Stream<Path> files = Files.list(outputPath)) {
             Path createdFile = files.findFirst()
                     .orElseThrow(() -> new AssertionError("No file was created in the output directory"));
 			assertThat(createdFile).hasExtension("txt");
-			assertThat(Files.readString(createdFile).trim()).isEqualTo(testContent);
+			assertThat(Files.readString(createdFile).trim()).isEqualTo(TEST_CONTENT);
         }
     }
 
     @Test
 	public void failOnMissingParam() {
-        RestAssured.given()
-                .when()
-				.post("/java/files")
-                .then()
-                .statusCode(400)
-				.body(containsString("'content' query parameter is missing"));
+        given()
+        .when()
+		    .post(ROOT_PATH)
+        .then()
+        	.statusCode(400)
+			.body(containsString("'content' query parameter is missing"));
     }
 }
