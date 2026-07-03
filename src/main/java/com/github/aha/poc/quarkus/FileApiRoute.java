@@ -23,9 +23,9 @@ public class FileApiRoute extends RouteBuilder {
         rest("/java")
             .post("/files")
             	.routeId("saveJavaToFileRoute")
-                .to("direct:saveToFileViaJava");
+		    .to("direct:saveXmlToFile");
 
-        from("direct:saveToFileViaJava")
+		from("direct:saveXmlToFile")
 		    .log("Received a request to save tontent to file. Checking query param '%s'".formatted(HEADER_CONTENT))
 		    .setBody(header(HEADER_CONTENT))
             .choice()
