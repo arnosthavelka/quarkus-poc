@@ -1,8 +1,8 @@
 package com.github.aha.poc.quarkus;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,11 +18,12 @@ import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
+import lombok.extern.slf4j.Slf4j;
 
 @QuarkusTest
-public class FileApiRouteTest {
+@Slf4j
+public class JavaConfigRouteTest {
 
-    // We inject the configured directory to know where to look for files during the test
     @ConfigProperty(name = "app.output.dir")
     String outputDir;
 
@@ -35,7 +36,6 @@ public class FileApiRouteTest {
 
     @AfterEach
     public void cleanUp() throws IOException {
-        // Clean up generated files after each test so they don't pile up
         if (Files.exists(outputPath)) {
             try (Stream<Path> walk = Files.walk(outputPath)) {
                 walk.sorted(Comparator.reverseOrder())
@@ -43,7 +43,7 @@ public class FileApiRouteTest {
                         try {
                             Files.delete(path);
                         } catch (IOException e) {
-                            // Log or ignore delete failures during cleanup
+							log.error("Log cleaning failed!", e);
                         }
                     });
             }
@@ -51,10 +51,10 @@ public class FileApiRouteTest {
     }
 
     @Test
-    public void testSaveFileSuccess() throws IOException {
+	public void saveFileSuccesslly() throws IOException {
         String testContent = "HelloCamelQuarkusIntegrationTest";
+		assumeThat(Files.exists(outputPath)).isFalse();
 
-        // 1. Send POST request with the 'cnt' query parameter
         RestAssured.given()
 				.queryParam("content", testContent)
                 .when()
@@ -63,25 +63,17 @@ public class FileApiRouteTest {
                 .statusCode(200)
 				.body(containsString("A new file was stored as"));
 
-        // 2. Verify that the file was actually created on disk
-        assertTrue(Files.exists(outputPath), "The output directory should exist");
 
-        // Find the created file (since the name contains a dynamic timestamp, we list the directory)
         try (Stream<Path> files = Files.list(outputPath)) {
             Path createdFile = files.findFirst()
                     .orElseThrow(() -> new AssertionError("No file was created in the output directory"));
-
-            // 3. Verify the file extension and its contents
-            assertTrue(createdFile.getFileName().toString().endsWith(".txt"), "File should be a .txt file");
-            
-            String fileContent = Files.readString(createdFile).trim();
-            assertEquals(testContent, fileContent, "The file content should match the query parameter value");
+			assertThat(createdFile).hasExtension("txt");
+			assertThat(Files.readString(createdFile).trim()).isEqualTo(testContent);
         }
     }
 
     @Test
-    public void testSaveFileMissingParam() {
-        // Test behavior when the required 'cnt' parameter is omitted
+	public void failOnMissingParam() {
         RestAssured.given()
                 .when()
 				.post("/java/files")
