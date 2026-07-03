@@ -1,6 +1,8 @@
 package com.github.aha.poc.quarkus;
 
 import static com.github.aha.poc.quarkus.FileApiRoute.HEADER_CONTENT;
+import static com.github.aha.poc.quarkus.FileApiRoute.HEADER_FILENAME;
+import static com.github.aha.poc.quarkus.FileApiRoute.ROOT_PATH;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assumptions.assumeThat;
@@ -26,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JavaConfigRouteTest {
 
-	final static String ROOT_PATH = "/java/files";
+	final static String BASE_PATH = "/java" + ROOT_PATH;
 	final static String TEST_CONTENT = "HelloCamelQuarkusIntegrationTest";
 
     @ConfigProperty(name = "app.output.dir")
@@ -59,13 +61,13 @@ public class JavaConfigRouteTest {
     class SaveFile {
     	
     	@Test
-    	public void defaulName() throws IOException {
+		public void genaratedFileName() throws IOException {
     		assumeThat(Files.exists(outputPath)).isFalse();
     		
     		given()
 			    .queryParam(HEADER_CONTENT, TEST_CONTENT)
 		    .when()
-			    .post(ROOT_PATH)
+			    .post(BASE_PATH)
 		    .then()
 	            .statusCode(200)
 				.body(containsString("A new file was stored as"));
@@ -80,15 +82,15 @@ public class JavaConfigRouteTest {
     	}
     	
 		@Test
-		public void definedName() throws IOException {
+		public void definedFileName() throws IOException {
 			assumeThat(Files.exists(outputPath)).isFalse();
 			var testFileName = "custom-file-name.txt";
 
 			given()
 			    .queryParam(HEADER_CONTENT, TEST_CONTENT)
-			    .queryParam("fileName", testFileName)
+			    .queryParam(HEADER_FILENAME, testFileName)
 			.when()
-			    .post(ROOT_PATH)
+			    .post(BASE_PATH)
 			.then()
 			    .statusCode(200)
 			    .body(containsString("A new file was stored as"));
@@ -107,9 +109,9 @@ public class JavaConfigRouteTest {
 	public void failOnMissingParam() {
         given()
         .when()
-		    .post(ROOT_PATH)
+		    .post(BASE_PATH)
         .then()
         	.statusCode(400)
-			.body(containsString("'content' query parameter is missing"));
+		    .body(containsString("'%s' query parameter is missing".formatted(HEADER_CONTENT)));
     }
 }

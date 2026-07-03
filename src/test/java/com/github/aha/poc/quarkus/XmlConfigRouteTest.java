@@ -59,7 +59,7 @@ public class XmlConfigRouteTest {
     class SaveFile {
     	
     	@Test
-    	public void defaulName() throws IOException {
+		public void genaratedFileName() throws IOException {
     		assumeThat(Files.exists(outputPath)).isFalse();
     		
     		given()
@@ -80,7 +80,7 @@ public class XmlConfigRouteTest {
     	}
     	
 		@Test
-		public void definedName() throws IOException {
+		public void definedFileName() throws IOException {
 			assumeThat(Files.exists(outputPath)).isFalse();
 			var testFileName = "custom-file-name.txt";
 
