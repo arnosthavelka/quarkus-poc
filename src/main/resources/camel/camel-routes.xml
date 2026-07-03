@@ -3,43 +3,41 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://camel.apache.org/schema/spring https://camel.apache.org/schema/spring/camel-spring.xsd">
 
-    <!-- Definice REST endpointů je nyní uvnitř elementu <camel> zcela validní -->
-    <rest path="/files">
-        <post path="/xml">
+    <rest path="/xml">
+        <post path="/files">
             <to uri="direct:saveXmlToFile"/>
         </post>
     </rest>
 
-    <!-- Samotná trasa -->
     <route id="saveXmlToFileRoute">
         <from uri="direct:saveXmlToFile"/>
         
-        <log message="Prijat pozavek na /files/xml. Overuji parametr 'ctnt'."/>
+        <log message="Received a request to save tontent to file. Checking query param 'content'"/>
 
         <setBody>
-            <header>ctnt</header>
+            <header>content</header>
         </setBody>
 
         <choice>
-            <!-- 1. Validace: Pokud chybí parametr 'cnt' -->
+            <!-- validation -->
             <when>
                 <simple>${body} == null</simple>
-                <log loggingLevel="WARN" message="Validace selhala: Chybi parametr 'ctnt'."/>
+                <log loggingLevel="WARN" message="Validation failed: 'content' query parameter is missing"/>
                 <setBody>
-                    <constant>Chybi povinny query parametr 'ctnt'</constant>
+                    <constant>'content' query parameter is missing</constant>
                 </setBody>
                 <setHeader name="CamelHttpResponseCode">
                     <constant>400</constant>
                 </setHeader>
             </when>
             
-            <!-- 2. Zpracování a zápis souboru -->
+            <!-- file processing -->
             <otherwise>
                 <choice>
                     <!-- Pokud uživatel zadal parametr 'fileName' -->
                     <when>
                         <simple>${header.fileName} != null</simple>
-                        <log message="Bude pouzit uzivatelsky nazev souboru: ${header.fileName}"/>
+                        <log message="The recognized filename is: ${header.fileName}"/>
                         <setHeader name="CamelOverruleFileName">
                             <simple>${header.fileName}</simple>
                         </setHeader>
@@ -53,15 +51,10 @@
                     </otherwise>
                 </choice>
 
-                <log message="Zapisuji obsah do adresare: {{app.output.dir}} s nazvem: ${header.CamelOverruleFileName}"/>
-                
-                <!-- Zápis na disk -->
+				<!-- file storing -->
                 <toD uri="file:{{app.output.dir}}?fileExist=Override"/>
-
-                <!-- Úspěšná odpověď -->
-                <log message="Soubor byl uspesne zapsan."/>
                 <setBody>
-                    <simple>Soubor byl uspesne ulozen jako: ${header.CamelOverruleFileName}</simple>
+                    <simple>A new file was stored as ${header.CamelOverruleFileName}</simple>
                 </setBody>
                 <setHeader name="CamelHttpResponseCode">
                     <constant>200</constant>

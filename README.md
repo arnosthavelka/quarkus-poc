@@ -33,10 +33,10 @@ If you want to learn more about building native executables, please consult <htt
 ## Test CURLs
 
 ```
-curl -X POST "http://localhost:8080/files/content?ctnt=HelloMyFriend"
+curl -X POST "http://localhost:8080/java/files?content=HelloMyFriend"
 
-curl -X POST "http://localhost:8080/files/xml?ctnt=ObsahSouboruVxml"
-curl -X POST "http://localhost:8080/files/xml?ctnt=ObsahSouboruVxml&fileName=muj_specialni_soubor.txt"
+curl -X POST "http://localhost:8080/xml/files?content=ObsahSouboruVxml"
+curl -X POST "http://localhost:8080/xml/files?content=ObsahSouboruVxml&fileName=muj_specialni_soubor.txt"
 ```
 
 ## Project creation

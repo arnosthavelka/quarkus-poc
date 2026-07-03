@@ -18,16 +18,16 @@ public class FileApiRoute extends RouteBuilder {
 		log.info("Configuring Camel REST Route using directory: {}", outputDir);
         restConfiguration().component("platform-http");
 
-        rest("/files")
-            .post("/content")
+        rest("/java")
+            .post("/files")
                 .to("direct:saveToFile");
 
         from("direct:saveToFile")
-	        .log("Received a file save request. Checking query param 'ctnt'.")	
-	        .setBody(header("ctnt"))
+			.log("Received a request to save tontent to file. Checking query param 'content'")
+	        .setBody(header("content"))
             .choice()
                 .when(body().isNull())
-                    .setBody(constant("'ctnt' query parameter is missing"))
+                    .setBody(constant("'content' query parameter is missing"))
                     .setHeader("CamelHttpResponseCode", constant(400))
                 .otherwise()
                     .setHeader("CamelOverruleFileName", simple("${date:now:yyyyMMdd-HHmmss}.txt"))

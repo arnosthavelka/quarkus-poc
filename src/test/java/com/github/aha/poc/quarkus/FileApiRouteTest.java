@@ -56,9 +56,9 @@ public class FileApiRouteTest {
 
         // 1. Send POST request with the 'cnt' query parameter
         RestAssured.given()
-				.queryParam("ctnt", testContent)
+				.queryParam("content", testContent)
                 .when()
-                .post("/files/content")
+				.post("/java/files")
                 .then()
                 .statusCode(200)
 				.body(containsString("A new file was stored as"));
@@ -84,9 +84,9 @@ public class FileApiRouteTest {
         // Test behavior when the required 'cnt' parameter is omitted
         RestAssured.given()
                 .when()
-                .post("/files/content")
+				.post("/java/files")
                 .then()
                 .statusCode(400)
-				.body(containsString("'ctnt' query parameter is missing"));
+				.body(containsString("'content' query parameter is missing"));
     }
 }
